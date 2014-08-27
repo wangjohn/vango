@@ -7,6 +7,9 @@ import (
   "regexp"
   "strconv"
   "image"
+  _ "image/png"
+  _ "image/jpeg"
+  _ "image/gif"
 
   "github.com/zenazn/goji"
 )
@@ -65,12 +68,19 @@ func ProcessImage(w http.ResponseWriter, r *http.Request) {
     http.Error(w, message, http.StatusBadRequest)
   }
 
-  img, imgFormat, err := image.DecodeConfig(multipartImgFile)
+  img, _, err := image.Decode(multipartImgFile)
   if err != nil {
     message := fmt.Sprintf("Error decoding image file: %s", err.Error())
     http.Error(w, message, http.StatusBadRequest)
   }
 
-  fmt.Println(img)
-  fmt.Println(imgFormat)
+  handleImage(img)
+}
+
+func handleImage(img image.Image) {
+
+}
+
+func primaryColor(img image.Image) {
+
 }
