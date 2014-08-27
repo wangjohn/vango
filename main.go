@@ -2,7 +2,17 @@ package main
 
 import (
   "fmt"
-  "github.com/goji/zenazn/goji"
+  "io"
+  "net/http"
+  "regexp"
+  "strconv"
+  "image"
+
+  "github.com/zenazn/goji"
+)
+
+const (
+  maxContentLength int = 5140000 // 5MB
 )
 
 func main() {
@@ -16,5 +26,51 @@ func Root(w http.ResponseWriter, r *http.Request) {
 }
 
 func ProcessImage(w http.ResponseWriter, r *http.Request) {
-  
+  contentTypes := r.Header["Content-Type"]
+  contentTypeRegex, _ := regexp.Compile("multipart/form-data")
+
+  for _, contentType := range contentTypes {
+    if !contentTypeRegex.MatchString(contentType) {
+      message := fmt.Sprintf("Bad content type: `%s` is not currently not supported", contentType)
+      http.Error(w, message, http.StatusBadRequest)
+    }
+  }
+
+  contentLength, _ := strconv.Atoi(r.Header["Content-Length"][0])
+  if contentLength > maxContentLength {
+    message := fmt.Sprintf("Bad content length: `%d` exceeds the maximum file size", contentLength)
+    http.Error(w, message, http.StatusBadRequest)
+  }
+
+  err := r.ParseMultipartForm(int64(maxContentLength))
+  if err != nil {
+    message := fmt.Sprintf("Error parsing multipart-form: %s", err.Error())
+    http.Error(w, message, http.StatusBadRequest)
+  }
+
+  imgFiles, imgFileExists := r.MultipartForm.File["file"]
+  if !imgFileExists {
+    message := "Error parsing multipart-form: must specify a `file` field"
+    http.Error(w, message, http.StatusBadRequest)
+  }
+
+  if len(imgFiles) > 1 {
+    message := "Only expected a single file to be uploaded, not multiple"
+    http.Error(w, message, http.StatusBadRequest)
+  }
+
+  multipartImgFile, err := imgFiles[0].Open()
+  if err != nil {
+    message := fmt.Sprintf("Error opening file: %s", err.Error())
+    http.Error(w, message, http.StatusBadRequest)
+  }
+
+  img, imgFormat, err := image.DecodeConfig(multipartImgFile)
+  if err != nil {
+    message := fmt.Sprintf("Error decoding image file: %s", err.Error())
+    http.Error(w, message, http.StatusBadRequest)
+  }
+
+  fmt.Println(img)
+  fmt.Println(imgFormat)
 }
