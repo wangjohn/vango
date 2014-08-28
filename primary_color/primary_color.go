@@ -39,25 +39,53 @@ func quantize(pixelArray []Rgb, size uint8) ([]Rgb, error) {
   histogram := constructHistogram(pixelArray)
   fmt.Println(histogram)
 
-  # TODO: take histogram and perform median cut
+  // TODO: take histogram and perform median cut
+  vbox := constructVBox(pixelArray, histogram)
+  fmt.Println(vbox)
 
   return result, nil
 }
 
-func constructHistogram(pixelArray []Rgb) []int{
-  size := 1 << (3 * sigbits)
-  histogram := make([]int, size)
+func constructVBox(pixelArray []Rgb, histogram []uint) VBox {
+  var rval, gval, bval uint8
+  rmax, gmax, bmax := uint8(0), uint8(0), uint8(0)
+  rmin, gmin, bmin := ^uint8(0), ^uint8(0), ^uint8(0)
 
   for _, pixel := range pixelArray {
-    i := colorIndex(pixel.R >> rshift, pixel.G >> rshift, pixel.B >> rshift)
+    rval = pixel.R >> rshift
+    gval = pixel.G >> rshift
+    bval = pixel.B >> rshift
+
+    if rval < rmin {
+      rmin = rval
+    } else if rval > rmax {
+      rmax = rval
+    }
+    if gval < gmin {
+      gmin = gval
+    } else if gval > gmax {
+      gmax = gval
+    }
+    if bval < bmin {
+      bmin = bval
+    } else if bval > bmax {
+      bmax = bval
+    }
+  }
+
+  return VBox{Rmin: rmin, Rmax: rmax, Gmin: gmin, Gmax: gmax, Bmin: bmin, Bmax: bmax, Histogram: histogram}
+}
+
+func constructHistogram(pixelArray []Rgb) []uint{
+  size := 1 << (3 * sigbits)
+  histogram := make([]uint, size)
+
+  for _, pixel := range pixelArray {
+    i := ColorIndex(pixel.R >> rshift, pixel.G >> rshift, pixel.B >> rshift)
     histogram[i]++
   }
 
   return histogram
-}
-
-func colorIndex(r, g, b uint8) uint16 {
-  return (uint16(r) << (2 * sigbits)) + (uint16(g) << sigbits) + uint16(b)
 }
 
 func constructPixelArray(img *image.RGBA) []Rgb {
