@@ -12,6 +12,7 @@ import (
   _ "image/gif"
 
   "github.com/zenazn/goji"
+  "github.com/wangjohn/vango/primary_color"
 )
 
 const (
@@ -78,9 +79,5 @@ func ProcessImage(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleImage(img image.Image) {
-
-}
-
-func primaryColor(img image.Image) {
-
+  primaryColor.PrimaryColor(img)
 }
