@@ -4,6 +4,7 @@ import (
   "fmt"
   "image"
   "image/draw"
+  "container/heap"
 )
 
 type Rgb struct {
@@ -41,9 +42,24 @@ func quantize(pixelArray []Rgb, size uint8) ([]Rgb, error) {
 
   // TODO: take histogram and perform median cut
   vbox := constructVBox(pixelArray, histogram)
-  fmt.Println(vbox)
 
   return result, nil
+}
+
+func iterate(queue CountPriorityQueue, histogram []uint, iterations int) {
+  numColors := 0
+  for i := 0; i < iterations; i++ {
+    vbox := heap.Pop(queue)
+    if vbox.Count() > 0 {
+      heap.Push(queue, vbox)
+    } else {
+      vbox1, vbox2 := applyMedianCut(histogram, vbox)
+
+      heap.Push(queue, vbox1)
+      heap.Push(queue, vbox2)
+      numColors++
+    }
+  }
 }
 
 func constructVBox(pixelArray []Rgb, histogram []uint) VBox {

@@ -24,3 +24,7 @@ func (v *VBox) Count() uint {
 
   return points
 }
+
+func (v *VBox) Volume() uint {
+  return uint(v.Rmax - v.Rmin) * uint(v.Gmax - v.Gmin) * uint(v.Bmax - v.Bmin)
+}
