@@ -49,14 +49,14 @@ func quantize(pixelArray []Rgb, size uint8) ([]Rgb, error) {
 func iterate(queue CountPriorityQueue, histogram []uint, iterations int) {
   numColors := 0
   for i := 0; i < iterations; i++ {
-    vbox := heap.Pop(queue)
+    vbox := heap.Pop(&queue).(*VBox)
     if vbox.Count() > 0 {
-      heap.Push(queue, vbox)
+      heap.Push(&queue, &vbox)
     } else {
       vbox1, vbox2 := applyMedianCut(histogram, vbox)
 
-      heap.Push(queue, vbox1)
-      heap.Push(queue, vbox2)
+      heap.Push(&queue, &vbox1)
+      heap.Push(&queue, &vbox2)
       numColors++
     }
   }

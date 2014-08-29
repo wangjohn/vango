@@ -1,41 +1,52 @@
 package primaryColor
 
-type PriorityQueue struct {
-  Array []*VBox
+type CountPriorityQueue []*VBox
+type CountVolumePriorityQueue []*VBox
+
+func (pq CountPriorityQueue) Len() int {
+  return len(pq)
 }
 
-func (pq PriorityQueue) Len() int {
-  return len(pq.Array)
+func (pq CountPriorityQueue) Swap(i, j int) {
+  pq[i], pq[j] = pq[j], pq[i]
 }
 
-func (pq PriorityQueue) Swap(i, j int) {
-  pq.Array[i], pq.Array[j] = pq.Array[j], pq.Array[i]
+func (pq *CountPriorityQueue) Push(x interface{}) {
+  *pq = append(*pq, x.(*VBox))
 }
 
-func (pq *PriorityQueue) Push(x interface{}) {
-  *pq.Array = append(*pq.Array, x.(*VBox))
-}
-
-func (pq *PriorityQueue) Pop() interface{} {
-  old := *pq.Array
+func (pq *CountPriorityQueue) Pop() interface{} {
+  old := *pq
   n := len(old)
   x := old[n-1]
-  *pq.Array = old[0 : n-1]
+  *pq = old[0 : n-1]
   return x
 }
 
-type CountPriorityQueue struct {
-  PriorityQueue
-}
-
 func (pq CountPriorityQueue) Less(i, j int) bool {
-  return pq.Array[i].Count() > pq.Array[j].Count()
-}
-
-type CountVolumePriorityQueue struct {
-  PriorityQueue
+  return pq[i].Count() > pq[j].Count()
 }
 
 func (pq CountVolumePriorityQueue) Less(i, j int) bool {
-  return pq.Array[i].Count() * pq.Array[i].Volume() > pq.Array[j].Count() * pq.Array[j].Volume()
+  return pq[i].Count() * pq[i].Volume() > pq[j].Count() * pq[j].Volume()
+}
+
+func (pq CountVolumePriorityQueue) Len() int {
+  return len(pq)
+}
+
+func (pq CountVolumePriorityQueue) Swap(i, j int) {
+  pq[i], pq[j] = pq[j], pq[i]
+}
+
+func (pq *CountVolumePriorityQueue) Push(x interface{}) {
+  *pq = append(*pq, x.(*VBox))
+}
+
+func (pq *CountVolumePriorityQueue) Pop() interface{} {
+  old := *pq
+  n := len(old)
+  x := old[n-1]
+  *pq = old[0 : n-1]
+  return x
 }
