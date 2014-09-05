@@ -62,36 +62,6 @@ func iterate(queue CountPriorityQueue, histogram []uint, iterations int) {
   }
 }
 
-func constructVBox(pixelArray []Rgb, histogram []uint) VBox {
-  var rval, gval, bval uint8
-  rmax, gmax, bmax := uint8(0), uint8(0), uint8(0)
-  rmin, gmin, bmin := ^uint8(0), ^uint8(0), ^uint8(0)
-
-  for _, pixel := range pixelArray {
-    rval = pixel.R >> rshift
-    gval = pixel.G >> rshift
-    bval = pixel.B >> rshift
-
-    if rval < rmin {
-      rmin = rval
-    } else if rval > rmax {
-      rmax = rval
-    }
-    if gval < gmin {
-      gmin = gval
-    } else if gval > gmax {
-      gmax = gval
-    }
-    if bval < bmin {
-      bmin = bval
-    } else if bval > bmax {
-      bmax = bval
-    }
-  }
-
-  return VBox{Rmin: rmin, Rmax: rmax, Gmin: gmin, Gmax: gmax, Bmin: bmin, Bmax: bmax, Histogram: histogram}
-}
-
 func constructHistogram(pixelArray []Rgb) []uint{
   size := 1 << (3 * sigbits)
   histogram := make([]uint, size)
